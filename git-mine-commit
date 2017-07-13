@@ -18,24 +18,20 @@
 mine() {
   local prefix=$1
   local max_iterations=$2
-  local progress_indicator="."
-  local commit_object=`git cat-file -p HEAD | head -n 2`
-  local tree=`echo "$commit_object" | head -n 1 | cut -c 6-46`
-  local head=`echo "$commit_object" | tail -n 1 | cut -c 8-48`
-  local branch=`git branch | sed -n -e 's/^\* \(.*\)/\1/p'`
+  local commit_object=`git cat-file -p HEAD`
 
-  local msg=`git log -1 --pretty=%B`
-
+  echo "$commit_object"
   echo -en "Mining HEAD's sha1..."
   for i in $(seq 0 $max_iterations)
   do
-    new_sha1=`echo -e "$msg\n\n[$i]" | git commit-tree $tree -p $head`
+    echo -n "."
+    new_sha1=`echo -e "$commit_object\n\n[$i]" | git hash-object -t commit --stdin`
 
 
     if [[ $new_sha1 == $prefix* ]]; then
       echo -e "\t [OK] ($i iterations)"
-      `git update-ref refs/heads/$branch $new_sha1`
-      echo -e "\nSuccess: HEAD updated, mined SHA1 is now $new_sha1\n"
+      echo -e "$commit_object\n\n[$i]" | git hash-object -t commit -w --stdin
+      echo -e "\nPreimage Found! $new_sha1\n"
       exit 0
     else
       let "val=$i % 70"
@@ -45,7 +41,6 @@ mine() {
     fi
   done
   echo -e "\t[KO] (Reached max iterations of $max_iterations>)"
-  echo -e "\nHint: Did you try adjusting the max iterations by passing it as an argument ?\n"
   exit 1
 }
 
