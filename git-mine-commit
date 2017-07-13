@@ -38,9 +38,9 @@ mine() {
       echo -e "\nSuccess: HEAD updated, mined SHA1 is now $new_sha1\n"
       exit 0
     else
-      let "val=$i % $max_iterations"
+      let "val=$i % 70"
       if [ $val -eq 0 ]; then
-        echo -n $progress_indicator
+        echo " " $i
       fi
     fi
   done
