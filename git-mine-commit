@@ -23,7 +23,7 @@ mine() {
   echo "$commit_object"
   echo -en "Mining HEAD's sha1..."
   i=0
-  while [ $1 -le $max_iterations ]
+  while [ $i -le $max_iterations ]
   do
     new_sha1=`echo -e "$commit_object\n\n[$i]" | git hash-object -t commit --stdin`
 
@@ -32,6 +32,7 @@ mine() {
       echo -e "\t [OK] ($i iterations)"
       echo -e "$commit_object\n\n[$i]" | git hash-object -t commit -w --stdin
       echo -e "\nPreimage Found! $new_sha1\n"
+      git reset --soft $new_sha1
       exit 0
     else
       let "val=$i % 1000"
